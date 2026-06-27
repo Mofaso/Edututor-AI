@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - FIREBASE_CREDENTIALS_PATH=/app/serviceAccountKey.json
+    volumes:
+      # Map local credentials file into container for Firebase auth
+      - ./backend/serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    # If building Vite locally and wanting dynamic ENV injection, 
+    # it's usually done at build time or using runtime window variables.
